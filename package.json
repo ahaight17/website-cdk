@@ -7,7 +7,7 @@
   "scripts": {
     "build": "npm install && tsc",
     "clean": "rm -rf dist build node_modules package-lock.json",
-    "release": "npm run clean && npm run build && cdk deploy",
+    "release": "npm run clean && npm run build && cdk deploy --all",
     "watch": "tsc -w",
     "cdk": "cdk"
   },
