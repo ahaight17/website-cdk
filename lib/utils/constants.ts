@@ -4,6 +4,8 @@ export const DNS_CONSTANTS = {
     certificateArn: "arn:aws:acm:us-east-1:587813431606:certificate/6bf5c89a-2a70-4e27-9214-c7f055a21955",
     domains: [
         "alexhaight.com",
+        "*.alexhaight.com",
         "www.alexhaight.com",
-    ]
+    ],
+    apiDomain: "api.alexhaight.com"
 }

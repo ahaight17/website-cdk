@@ -3,7 +3,7 @@ import { Construct } from "constructs";
 import path = require("path");
 
 export class LambdaConstruct extends Construct {
-	public handler: IFunction
+	public lambdaFunction: IFunction
 
 	constructor(scope: Construct, id: string) {
 		super(scope, id);
@@ -14,6 +14,6 @@ export class LambdaConstruct extends Construct {
 			code: Code.fromAsset(path.join(__dirname)),
 		})
 
-		this.handler = handler
+		this.lambdaFunction = handler
 	}
 }

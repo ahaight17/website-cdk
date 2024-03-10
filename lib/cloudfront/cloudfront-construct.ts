@@ -4,14 +4,19 @@ import { CanonicalUserPrincipal, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { Bucket, BucketAccessControl } from "aws-cdk-lib/aws-s3";
 import { Construct } from "constructs";
 import { DNS_CONSTANTS } from '../utils/constants'
-import { DnsRecordsConstruct } from "../dns/dns-records-construct";
-import { DnsConstruct } from "../dns/dns-construct";
+import { ICertificate } from "aws-cdk-lib/aws-certificatemanager";
+
+interface CloudfrontConstructProps {
+	certificate: ICertificate
+}
 
 export class CloudfrontConstruct extends Construct {
-    constructor(scope: Construct, id: string) {
+	public distribution: Distribution
+
+    constructor(scope: Construct, id: string, props: CloudfrontConstructProps) {
         super(scope, id);
 
-		const { zone, certificate } = new DnsConstruct(this, "DnsConstruct");
+		const { certificate } = props
 		const originAccessIdentity = new OriginAccessIdentity(this, "OriginAccessIdentity");
 
 		const s3Bucket = new Bucket(this, "S3Bucket", {
@@ -25,7 +30,7 @@ export class CloudfrontConstruct extends Construct {
 			principals: [new CanonicalUserPrincipal(originAccessIdentity.cloudFrontOriginAccessIdentityS3CanonicalUserId)]
 		}));
 
-		const distribution = new Distribution(this, "CloudFrontDistribution", {
+		this.distribution = new Distribution(this, "CloudFrontDistribution", {
 			defaultBehavior: {
 				origin: new S3Origin(s3Bucket, {
 					originPath: "/dist"
@@ -38,10 +43,5 @@ export class CloudfrontConstruct extends Construct {
 			domainNames: DNS_CONSTANTS.domains,
 			certificate
 		});
-
-		new DnsRecordsConstruct(this, "DnsRecordsConstruct", {
-			zone,
-			distribution
-		})
     }
 }
