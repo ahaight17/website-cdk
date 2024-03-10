@@ -9,8 +9,7 @@
     "clean": "rm -rf dist build node_modules package-lock.json",
     "release": "npm run clean && npm run build && cdk deploy --all",
     "format": "eslint \"**/*.js\" \"**/*.ts\" --fix",
-    "watch": "tsc -w",
-    "cdk": "cdk"
+    "watch": "tsc -w"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.134",
