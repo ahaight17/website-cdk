@@ -10,22 +10,23 @@ export class App extends cdk.Stack {
 		super(scope, id, props);
 
 		const { zone, certificate } = new DnsConstruct(this, "DnsConstruct");
-		
-		const { distribution} = new CloudfrontConstruct(this, "CloudfrontConstruct", {
-			certificate
-		})
 
 		const { lambdaFunction} = new LambdaConstruct(this, "LambdaFunction");
+		
+		const { distribution } = new CloudfrontConstruct(this, "CloudfrontConstruct", {
+			certificate,
+			lambdaFunction
+		});
 
 		const { api } = new ApiGatewayConstruct(this, "ApiGatewayConstruct", {
 			lambdaFunction,
 			certificate
-		})
+		});
 
 		new DnsRecordsConstruct(this, "DnsRecordsConstruct", {
 			zone,
 			distribution,
 			api
-		})
+		});
 	}
 }

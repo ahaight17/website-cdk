@@ -1,7 +1,7 @@
 import { StackProps } from "aws-cdk-lib";
 import { Distribution } from "aws-cdk-lib/aws-cloudfront";
 import { ARecord, AaaaRecord, IHostedZone, RecordTarget } from "aws-cdk-lib/aws-route53";
-import { ApiGateway, ApiGatewayDomain, CloudFrontTarget } from "aws-cdk-lib/aws-route53-targets";
+import { ApiGateway, CloudFrontTarget } from "aws-cdk-lib/aws-route53-targets";
 import { Construct } from "constructs";
 import { DNS_CONSTANTS } from "../utils/constants";
 import { RestApi } from "aws-cdk-lib/aws-apigateway";
@@ -16,7 +16,7 @@ export class DnsRecordsConstruct extends Construct {
 	constructor(scope: Construct, id: string, props: DnsConstructProps) {
 		super(scope, id);
     
-		const { zone, distribution, api } = props
+		const { zone, distribution, api } = props;
 
 		DNS_CONSTANTS.domains.forEach((domain: string) => {
 
@@ -31,7 +31,7 @@ export class DnsRecordsConstruct extends Construct {
 				target: RecordTarget.fromAlias(new CloudFrontTarget(distribution)),
 				recordName: domain
 			});
-		})
+		});
 
 		new ARecord(this, `CDNARecord${DNS_CONSTANTS.apiDomain}`, {
 			zone,

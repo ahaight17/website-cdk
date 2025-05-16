@@ -3,20 +3,22 @@ import { S3Origin } from "aws-cdk-lib/aws-cloudfront-origins";
 import { CanonicalUserPrincipal, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { Bucket, BucketAccessControl } from "aws-cdk-lib/aws-s3";
 import { Construct } from "constructs";
-import { DNS_CONSTANTS } from '../utils/constants'
+import { DNS_CONSTANTS } from "../utils/constants";
 import { ICertificate } from "aws-cdk-lib/aws-certificatemanager";
+import { IFunction } from "aws-cdk-lib/aws-lambda";
 
 interface CloudfrontConstructProps {
-	certificate: ICertificate
+	certificate: ICertificate,
+	lambdaFunction: IFunction
 }
 
 export class CloudfrontConstruct extends Construct {
-	public distribution: Distribution
+	public distribution: Distribution;
 
-    constructor(scope: Construct, id: string, props: CloudfrontConstructProps) {
-        super(scope, id);
+	constructor(scope: Construct, id: string, props: CloudfrontConstructProps) {
+		super(scope, id);
 
-		const { certificate } = props
+		const { certificate, lambdaFunction } = props;
 		const originAccessIdentity = new OriginAccessIdentity(this, "OriginAccessIdentity");
 
 		const s3Bucket = new Bucket(this, "S3Bucket", {
@@ -29,6 +31,8 @@ export class CloudfrontConstruct extends Construct {
 			resources: [s3Bucket.arnForObjects("*")],
 			principals: [new CanonicalUserPrincipal(originAccessIdentity.cloudFrontOriginAccessIdentityS3CanonicalUserId)]
 		}));
+		
+		s3Bucket.grantReadWrite(lambdaFunction);
 
 		this.distribution = new Distribution(this, "CloudFrontDistribution", {
 			defaultBehavior: {
@@ -38,10 +42,9 @@ export class CloudfrontConstruct extends Construct {
 				allowedMethods: AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
 				viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
 			},
-        
 			defaultRootObject: "index.html",
 			domainNames: DNS_CONSTANTS.domains,
 			certificate
 		});
-    }
+	}
 }

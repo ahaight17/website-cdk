@@ -4,13 +4,13 @@ import { Construct } from "constructs";
 import { DNS_CONSTANTS } from "../utils/constants";
 
 export class DnsConstruct extends Construct {
-    public zone: IHostedZone;
-    public certificate: ICertificate
+	public zone: IHostedZone;
+	public certificate: ICertificate;
 
-    constructor(scope: Construct, id: string) {
-        super(scope, id);
+	constructor(scope: Construct, id: string) {
+		super(scope, id);
 
-        this.certificate = Certificate.fromCertificateArn(
+		this.certificate = Certificate.fromCertificateArn(
 			this,
 			"WebsiteCertificate",
 			DNS_CONSTANTS.certificateArn
@@ -20,5 +20,5 @@ export class DnsConstruct extends Construct {
 			hostedZoneId: DNS_CONSTANTS.hostedZoneId,
 			zoneName: DNS_CONSTANTS.zoneName
 		});
-    }
+	}
 }

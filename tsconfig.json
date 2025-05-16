@@ -1,12 +1,18 @@
 {
   "compilerOptions": {
-    "outDir": "dist",
+    "outDir": "./dist",
     "target": "ES2020",
     "module": "commonjs",
     "lib": [
       "es2020",
       "dom"
     ],
+    "baseUrl": ".",
+    "paths": {
+      "~/*": [
+        "./lib/*"
+      ],
+    },
     "declaration": true,
     "strict": true,
     "noImplicitAny": true,
@@ -25,8 +31,11 @@
       "./node_modules/@types"
     ]
   },
+  "include": [ "lib/**/*" ],
   "exclude": [
     "node_modules",
-    "cdk.out"
+    "cdk.out",
+    "dist",
+    "build"
   ]
 }
