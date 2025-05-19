@@ -1,9 +1,10 @@
 import * as cdk from "aws-cdk-lib";
 import { LambdaConstruct } from "./lambda/lambda-construct";
-import { CloudfrontConstruct } from "./cloudfront/cloudfront-construct";
+import { WebsiteCloudfront } from "./cloudfront/website-cloudfront";
 import { ApiGatewayConstruct } from "./apigw/apigw-construct";
 import { DnsConstruct } from "./dns/dns-construct";
 import { DnsRecordsConstruct } from "./dns/dns-records-construct";
+import { CdnCloudfront } from "./cloudfront/cdn-cloudfront";
 
 export class App extends cdk.Stack {
 	constructor(scope: cdk.App, id: string, props: cdk.StackProps) {
@@ -13,7 +14,12 @@ export class App extends cdk.Stack {
 
 		const { lambdaFunction} = new LambdaConstruct(this, "LambdaFunction");
 		
-		const { distribution } = new CloudfrontConstruct(this, "CloudfrontConstruct", {
+		const { websiteDistribution } = new WebsiteCloudfront(this, "WebsiteCloudfront", {
+			certificate,
+			lambdaFunction
+		});
+
+		const { cdnDistribution } = new CdnCloudfront(this, "CdnCloudfront", {
 			certificate,
 			lambdaFunction
 		});
@@ -25,7 +31,8 @@ export class App extends cdk.Stack {
 
 		new DnsRecordsConstruct(this, "DnsRecordsConstruct", {
 			zone,
-			distribution,
+			websiteDistribution,
+			cdnDistribution,
 			api
 		});
 	}

@@ -8,7 +8,8 @@ import { RestApi } from "aws-cdk-lib/aws-apigateway";
 
 interface DnsConstructProps extends StackProps {
 	zone: IHostedZone,
-	distribution: Distribution
+	websiteDistribution: Distribution,
+	cdnDistribution: Distribution
 	api: RestApi
 }
 
@@ -16,19 +17,34 @@ export class DnsRecordsConstruct extends Construct {
 	constructor(scope: Construct, id: string, props: DnsConstructProps) {
 		super(scope, id);
     
-		const { zone, distribution, api } = props;
+		const { zone, websiteDistribution, cdnDistribution, api } = props;
 
-		DNS_CONSTANTS.domains.forEach((domain: string) => {
+		DNS_CONSTANTS.websiteDomains.forEach((domain: string) => {
 
 			new ARecord(this, `CDNARecord${domain}`, {
 				zone,
-				target: RecordTarget.fromAlias(new CloudFrontTarget(distribution)),
+				target: RecordTarget.fromAlias(new CloudFrontTarget(websiteDistribution)),
 				recordName: domain
 			});
 
 			new AaaaRecord(this, `CDNAliasRecord${domain}`, {
 				zone,
-				target: RecordTarget.fromAlias(new CloudFrontTarget(distribution)),
+				target: RecordTarget.fromAlias(new CloudFrontTarget(websiteDistribution)),
+				recordName: domain
+			});
+		});
+
+		DNS_CONSTANTS.cdnDomains.forEach((domain: string) => {
+
+			new ARecord(this, `CDNARecord${domain}`, {
+				zone,
+				target: RecordTarget.fromAlias(new CloudFrontTarget(cdnDistribution)),
+				recordName: domain
+			});
+
+			new AaaaRecord(this, `CDNAliasRecord${domain}`, {
+				zone,
+				target: RecordTarget.fromAlias(new CloudFrontTarget(cdnDistribution)),
 				recordName: domain
 			});
 		});
