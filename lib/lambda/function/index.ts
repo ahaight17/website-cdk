@@ -10,6 +10,27 @@ const s3 = new S3Client();
 const MAX_FETCH_KEYS = 1000;
 
 export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
+	const allowedOrigins = [
+		"https://alexhaight.com",
+		"https://www.alexhaight.com"
+	];
+
+	const origin = event.headers.origin!;
+
+	const corsHeaders = {
+		"Access-Control-Allow-Origin": allowedOrigins.includes(origin) ? origin : "",
+		"Access-Control-Allow-Methods": "GET,OPTIONS",
+		"Access-Control-Allow-Headers": "Content-Type",
+		"Access-Control-Allow-Credentials": "true"
+	};
+	if (event.httpMethod === "OPTIONS") {
+		return {
+			statusCode: 200,
+			headers: corsHeaders,
+			body: "",
+		};
+	}
+
 	try {
 		const folder = event.queryStringParameters?.folder;
 		const limit = parseInt(event.queryStringParameters?.limit || "20");
@@ -64,12 +85,14 @@ export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyRe
 				items: signedUrls,
 				nextToken: newNextToken,
 			}),
+			headers: corsHeaders,
 		};
 	} catch (error) {
 		console.error("Error generating image list:", error);
 		return {
 			statusCode: 500,
 			body: JSON.stringify({ error: "Internal server error" }),
+			headers: corsHeaders,
 		};
 	}
 };
