@@ -1,9 +1,9 @@
 import { APIGatewayProxyResult, APIGatewayEvent } from "aws-lambda";
-import { GetObjectCommand, ListObjectsV2Command, S3Client } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { ListObjectsV2Command, S3Client } from "@aws-sdk/client-s3";
 
 const S3_CONSTANTS = {
 	bucketName: "alexhaight-website-images",
+	cdnUrl: "https://cdn.alexhaight.com"
 };
 
 const s3 = new S3Client();
@@ -62,27 +62,25 @@ export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyRe
 			nextToken = listResult.IsTruncated ? listResult.NextContinuationToken : undefined;
 		} while (nextToken && allKeys.length < MAX_FETCH_KEYS);
 
-		allKeys.sort((a, b) => a.localeCompare(b));
+		allKeys.sort((a, b) => {
+			const nameA = a.split("/").pop()!;
+			const nameB = b.split("/").pop()!;
+			return nameA.localeCompare(nameB);
+		});
 
 		const offset = continuationToken ? parseInt(continuationToken, 10) : 0;
 		const pagedKeys = allKeys.slice(offset, offset + limit);
 		const newNextToken = offset + limit < allKeys.length ? String(offset + limit) : null;
 
-		const signedUrls = await Promise.all(
-			pagedKeys.map(async key => {
-				const signedUrl = await getSignedUrl(
-					s3,
-					new GetObjectCommand({ Bucket: S3_CONSTANTS.bucketName, Key: key }),
-					{ expiresIn: 3600 } // 1 hour expiry
-				);
-				return { key, url: signedUrl };
-			})
-		);
+		const cdnUrls = pagedKeys.map(key => ({
+			key,
+			url: `${S3_CONSTANTS.cdnUrl}/${encodeURIComponent(key).replace(/%2F/g, "/")}`
+		}));
 
 		return {
 			statusCode: 200,
 			body: JSON.stringify({
-				items: signedUrls,
+				items: cdnUrls,
 				nextToken: newNextToken,
 			}),
 			headers: corsHeaders,
